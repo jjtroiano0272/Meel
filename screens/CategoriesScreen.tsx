@@ -85,7 +85,7 @@ const CategoriesScreen = (foo?: any) => {
         data={myData}
         renderItem={renderItem}
         numColumns={2}
-        keyExtractor={(item, index) => item.id}
+        keyExtractor={(item, index) => item.id.toString()}
       />
     </View>
   );
