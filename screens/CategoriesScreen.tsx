@@ -1,85 +1,101 @@
+import axios from 'axios';
 import React, { useEffect, useState } from 'react';
-import { Alert, FlatList, Text, View } from 'react-native';
+import { Alert, FlatList, Text, View, StyleSheet } from 'react-native';
 import { Avatar, Button, Card, Title, Paragraph } from 'react-native-paper';
+import { Item } from 'react-native-paper/lib/typescript/components/Drawer/Drawer';
 
 const CategoriesScreen = (foo?: any) => {
   // Pulling data like
   // GET https://api.unsplash.com//search/photos?query=food
-  const [data, setData] = useState<
+  const [myData, setMyData] = useState<
     {
       userId: number;
       id: number;
       title: string;
       completed: boolean;
-      imgSrc: string;
+      imgSrc?: string;
     }[]
   >();
 
+  // .get('https://jsonplaceholder.typicode.com/todos/1')
   useEffect(() => {
-    let items: { id: number; src: string }[] = Array.apply(null, Array(20)).map(
-      (v, i) => {
-        return {
-          id: i,
-          src: 'https://unsplash.it/400/400?image=' + (i + 1),
-        };
-      }
-    );
+    const fetchData = async () => {
+      // get the data from the api
+      const res = await fetch('https://jsonplaceholder.typicode.com/todos/');
+      // convert the data to json
+      const json = await res.json();
 
-    const res = fetch('https://jsonplaceholder.typicode.com/todos/')
-      .then(response => response.json())
-      .then(json =>
-        setData(prev => [
-          {
-            ...prev,
-            completed: json.completed,
-            id: json.id,
-            title: json.title,
-            userId: json.userId,
-            imgSrc: 'https://unsplash.it/300/300',
-          },
-        ])
-      );
+      // set state with the result
+      console.log(json);
+      setMyData(json);
+    };
 
-    console.log(data);
-
-    // TODO REQUIRES OAUTH TOKEN
-    // const res2 = fetch('https://api.unsplash.com//search/photos?query=food')
-    //   .then(response => response.json())
-    //   .then(json => console.log(json));
+    // make sure to catch any error
+    fetchData().catch(err => console.error(err));
   }, []);
+
+  const DATA = [
+    {
+      id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
+      title: 'First Item',
+    },
+    {
+      id: '3ac68afc-c605-48d3-a4f8-fbd91aa97f63',
+      title: 'Second Item',
+    },
+    {
+      id: '58694a0f-3da1-471f-bd96-145571e29d72',
+      title: 'Third Item',
+    },
+  ];
+
+  const Item = ({ title }) => (
+    <View style={styles.item}>
+      <Text style={styles.title}>{title}</Text>
+    </View>
+  );
+
+  const renderItem = ({ item }) => (
+    <Card>
+      <Card.Content>
+        <Title>{item.title}</Title>
+        <Paragraph>{item.imgSrc}</Paragraph>
+      </Card.Content>
+      <Card.Cover
+        source={{ uri: 'https://unsplash.it/400/400?image=' + item.id }}
+      />
+      <Card.Actions>
+        <Button onPress={() => console.log('Cancel on card pressed')}>
+          Cancel
+        </Button>
+        <Button onPress={() => console.log(myData)}>Ok</Button>
+      </Card.Actions>
+    </Card>
+  );
 
   return (
     <View>
+      <Text style={{ fontSize: 40 }}>Willl this show up?</Text>
+
       <FlatList
-        data={data}
-        renderItem={({ item }) => (
-          <Card>
-            <Card.Title
-              title={'Foo'}
-              subtitle={'bar, beeeetch'}
-              // left={LeftContent}
-            />
-            <Card.Content>
-              <Title>Card title</Title>
-              <Paragraph>Card content</Paragraph>
-            </Card.Content>
-            <Card.Cover
-              source={{ uri: 'https://unsplash.it/400/400?image=3' }}
-            />
-            <Card.Actions>
-              <Button onPress={() => console.log('Cancel on card pressed')}>
-                Cancel
-              </Button>
-              <Button onPress={() => console.log('OK on card pressed')}>
-                Ok
-              </Button>
-            </Card.Actions>
-          </Card>
-        )}
-        // keyExtractor={dummyData?.id}
+        data={myData}
+        renderItem={renderItem}
+        numColumns={2}
+        keyExtractor={(item, index) => item.id}
       />
     </View>
   );
 };
 
+const styles = StyleSheet.create({
+  item: {
+    backgroundColor: '#f9c2ff',
+    padding: 20,
+    marginVertical: 8,
+    marginHorizontal: 16,
+  },
+  title: {
+    fontSize: 32,
+  },
+});
 export default CategoriesScreen;
