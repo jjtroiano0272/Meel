@@ -21,13 +21,13 @@ const theme = {
 export default function App() {
   return (
     <PaperProvider theme={theme}>
-      <View style={styles.container}>
-        <SafeAreaView>
-          <StatusBar style='auto' />
+      {/* <View style={styles.container}> */}
+      <SafeAreaView>
+        <StatusBar style='auto' />
 
-          <CategoriesScreen />
-        </SafeAreaView>
-      </View>
+        <CategoriesScreen />
+      </SafeAreaView>
+      {/* </View> */}
     </PaperProvider>
   );
 }

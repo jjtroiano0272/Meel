@@ -1,8 +1,17 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
-import { Alert, FlatList, Text, View, StyleSheet } from 'react-native';
-import { Avatar, Button, Card, Title, Paragraph } from 'react-native-paper';
+import {
+  Alert,
+  FlatList,
+  View,
+  StyleSheet,
+  Image,
+  Pressable,
+  Platform,
+} from 'react-native';
+import { Avatar, Button, Card, Text } from 'react-native-paper';
 import { Item } from 'react-native-paper/lib/typescript/components/Drawer/Drawer';
+import GridFlatList from 'grid-flatlist-react-native';
 
 const CategoriesScreen = (foo?: any) => {
   // Pulling data like
@@ -20,13 +29,30 @@ const CategoriesScreen = (foo?: any) => {
   // .get('https://jsonplaceholder.typicode.com/todos/1')
   useEffect(() => {
     const fetchData = async () => {
-      // get the data from the api
       const res = await fetch('https://jsonplaceholder.typicode.com/todos/');
-      // convert the data to json
       const json = await res.json();
 
+      const resVals = Object.values(json);
+      const head = resVals.slice(0, 2);
+      const tail = resVals.slice(resVals.length - 4, resVals.length - 1);
+
       // set state with the result
-      console.log(json);
+      console.log(
+        'json API response direct in method definition: ',
+        // Where each val is an object in array, with all props
+        head,
+        tail
+      );
+
+      // TODO I know how to write this as a for, but how to do this as Array.from()?
+      for (let i = 0; i < 200; i++) {
+        // add dynamic link to json (treat as array?))
+        // How to add key and value to object?
+        json[
+          i
+        ].imgSrc = `https://unsplash.it/${styles.gridItemImg.width}/${styles.gridItemImg.height}?image=${i}`;
+      }
+
       setMyData(json);
     };
 
@@ -34,72 +60,114 @@ const CategoriesScreen = (foo?: any) => {
     fetchData().catch(err => console.error(err));
   }, []);
 
-  const DATA = [
-    {
-      id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
-      title: 'First Item',
-    },
-    {
-      id: '3ac68afc-c605-48d3-a4f8-fbd91aa97f63',
-      title: 'Second Item',
-    },
-    {
-      id: '58694a0f-3da1-471f-bd96-145571e29d72',
-      title: 'Third Item',
-    },
-    {
-      id: '58694a0a-3da1-471f-bd96-145571e29d72',
-      title: 'Fourth Item',
-    },
-  ];
-
-  const Item = ({ title }) => (
-    <View style={styles.item}>
-      <Text style={styles.title}>{title}</Text>
-    </View>
-  );
+  const LeftContent = props => <Avatar.Icon {...props} icon='folder' />;
 
   const renderItem = ({ item }) => (
-    <Card>
-      <Card.Content>
-        <Title>{item.title}</Title>
-        <Paragraph>{item.imgSrc}</Paragraph>
-      </Card.Content>
-      <Card.Cover
-        source={{ uri: 'https://unsplash.it/400/400?image=' + item.id }}
-      />
-      <Card.Actions>
-        <Button onPress={() => console.log('Cancel on card pressed')}>
-          Cancel
-        </Button>
-        <Button onPress={() => console.log(myData)}>Ok</Button>
-      </Card.Actions>
-    </Card>
+    // <View style={styles.gridItem}>
+    //   <Pressable style={styles.button}>
+    //     <View style={styles.innerContainer}>
+    //       <Image
+    //         source={{
+    //           uri: `https://unsplash.it/${styles.gridItemImg.width}/${styles.gridItemImg.height}?image=${item?.id}`,
+    //         }}
+    //         style={styles.gridItemImg}
+    //         resizeMode='cover'
+    //       />
+    //       <Text style={{ fontSize: 16 }}>{item?.title}</Text>
+    //     </View>
+    //   </Pressable>
+    // </View>
+
+    <View style={styles.gridItem}>
+      <Card>
+        {/* <Card.Title
+          title={item?.title}
+          subtitle={item?.id}
+          left={LeftContent}
+        /> */}
+        <Card.Content>
+          {/* <Text variant='titleLarge'>{item?.title}</Text> */}
+          <Text variant='bodyMedium'>
+            {item?.completed ? 'Completed' : 'Not yet completed'}
+          </Text>
+        </Card.Content>
+        <Card.Cover
+          source={{
+            uri: `https://unsplash.it/${styles.gridItemImg.width}/${styles.gridItemImg.height}?image=${item?.id}`,
+          }}
+        />
+        {/* Card Actions? */}
+      </Card>
+    </View>
   );
 
   return (
     <View>
-      <Text style={{ fontSize: 40 }}>Willl this show up?</Text>
+      {/* <Text style={{ fontSize: 40 }}>Willl this show up?</Text> */}
 
       <FlatList
         data={myData}
+        keyExtractor={item => item.id.toString()}
         renderItem={renderItem}
         numColumns={2}
-        keyExtractor={(item, index) => item.id.toString()}
+        showsVerticalScrollIndicator={false}
       />
+      {/* <GridFlatList
+        data={myData}
+        renderItem={renderItem}
+        gap={30}
+        paddingHorizontal={10}
+      /> */}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  item: {
-    backgroundColor: '#f9c2ff',
-    padding: 20,
-    marginVertical: 8,
-    marginHorizontal: 16,
+  cardContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    margin: 5,
+    backgroundColor: '#ecf0f1',
   },
-  title: {
-    fontSize: 32,
+  card: {
+    flex: 1,
+    height: 30,
+    width: 30,
+  },
+  gridItem: {
+    flex: 1,
+    marginHorizontal: 16,
+    marginVertical: 60,
+    height: 150,
+    // width: 150,
+    borderRadius: 10,
+    elevation: 4,
+    shadowColor: 'black',
+    shadowOpacity: 0.25,
+    shadowOffset: { height: 2, width: 0 },
+    shadowRadius: 8,
+    backgroundColor: 'white',
+  },
+  gridItemImg: {
+    flex: 1,
+    width: 300,
+    height: 300,
+    overflow: 'hidden',
+  },
+  button: {
+    flex: 1,
+    height: 300,
+    width: 300,
+  },
+  buttonPressed: {
+    opacity: 0.5,
+  },
+  innerContainer: {
+    flex: 1,
+    padding: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
+
 export default CategoriesScreen;
